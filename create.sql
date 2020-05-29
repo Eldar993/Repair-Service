@@ -1,5 +1,7 @@
+
 CREATE SEQUENCE clients_seq AS INT
-START WITH 1
+START
+WITH 1
     INCREMENT BY 1
     MINVALUE 1;
 
@@ -13,7 +15,8 @@ CREATE TABLE Clients
 
 
 CREATE SEQUENCE descriptions_seq AS INT
-START WITH 1
+START
+WITH 1
     INCREMENT BY 1
     MINVALUE 1;
 
@@ -25,7 +28,8 @@ CREATE TABLE Descriptions
 );
 
 CREATE SEQUENCE orders_seq AS INT
-START WITH 1
+START
+WITH 1
     INCREMENT BY 1
     MINVALUE 1;
 
@@ -38,13 +42,14 @@ CREATE TABLE Orders
     worker_id      INT         NOT NULL,
     client_id      INT         NOT NULL,
     CONSTRAINT fk_clients FOREIGN KEY (client_id)
-        REFERENCES Clients (id),
+        REFERENCES Clients (id) ON DELETE CASCADE,
     CONSTRAINT fk_descriptions FOREIGN KEY (description_id)
-        REFERENCES Descriptions (id)
+        REFERENCES Descriptions (id) ON DELETE CASCADE
 );
 
 CREATE SEQUENCE workers_seq AS INT
-START WITH 1
+START
+WITH 1
     INCREMENT BY 1
     MINVALUE 1;
 
@@ -67,42 +72,44 @@ CREATE TABLE workers_orders
 
 
 INSERT INTO Clients(client_name, telephone, email)
-VALUES ('John', '123456789', 'john@gmail.com'),
-    ('Tom','123','tom@yandex.com'),
+VALUES ('John', '123456789', 'john@gmail.com') ,
+    ('Tom','123','tom@yandex.com')
+    ,
     ('Jerry','987654321','jerry@rambler.com');
 
+INSERT INTO Descriptions(problem_type, problem_description)
+VALUES ('glass', 'front broken glass') ,
+    ('PCcomponent','Fix processsor cooling')
+    ,
+    ('Antivirus','Clean computer from viruses');
+
 INSERT INTO Orders(device, description_id, created_at, worker_id, client_id)
-VALUES ('iphone', 2, '2018-06-23 07:30:20', 1, 1) ,
-       ('laptop',1,'2020-03-22 05:20:30',2,3),
-       ('PC',2,'2019-07-15 07:30:20',3,2);
+VALUES ('iphone', 1, '2018-06-23 07:30:20', 1, 1) ,
+    ('laptop',3,'2020-03-22 05:20:30',2,3)
+    ,
+    ('PC',2,'2019-07-15 07:30:20',3,2);
 
 INSERT INTO Workers(worker_name)
 VALUES ('Hank') ,
-       ('Bill'),
-       ('James');
-
-INSERT INTO Descriptions(problem_type, problem_description)
-VALUES ('glass', 'front broken glass'),
-       ('PCcomponent','Fix processsor cooling'),
-       ('Antivirus','Clean computer from viruses');
+    ('Bill')
+    ,
+    ('James');
 
 
 
-SELECT *
-FROM Orders;
+INSERT INTO workers_orders(order_id, worker_id)
+VALUES (1, 2);
+
+
 SELECT *
 FROM Clients;
 SELECT *
 FROM Workers;
 SELECT *
 FROM Descriptions;
-
-DROP TABLE Orders;
-DROP TABLE Clients;
-DROP TABLE Workers;
-DROP TABLE Descriptions;
-
-DROP SEQUENCE clients_seq;
-DROP SEQUENCE orders_seq;
-DROP SEQUENCE workers_seq;
-DROP SEQUENCE descriptions_seq;
+SELECT *
+FROM Orders;
+SELECT *
+FROM Orders
+         INNER JOIN Descriptions
+                    ON Orders.description_id = descriptions.id;
