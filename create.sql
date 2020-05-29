@@ -36,10 +36,11 @@ WITH 1
 CREATE TABLE Orders
 (
     id             INT PRIMARY KEY DEFAULT(NEXT VALUE FOR orders_seq),
-    device         VARCHAR(50) NOT NULL,
+    device         VARCHAR(50)   NOT NULL,
     description_id INT,
-    created_at     DATETIME2   NOT NULL,
-    client_id      INT         NOT NULL,
+    price          DECIMAL(5, 2) NOT NULL,
+    created_at     DATETIME2     NOT NULL,
+    client_id      INT           NOT NULL,
     CONSTRAINT fk_clients FOREIGN KEY (client_id)
         REFERENCES Clients (id) ON DELETE CASCADE,
     CONSTRAINT fk_descriptions FOREIGN KEY (description_id)
@@ -82,11 +83,11 @@ VALUES ('glass', 'front broken glass') ,
     ,
     ('Antivirus','Clean computer from viruses');
 
-INSERT INTO Orders(device, description_id, created_at,client_id)
-VALUES ('iphone', 1, '2018-06-23 07:30:20',1) ,
-    ('laptop',3,'2020-03-22 05:20:30',3)
+INSERT INTO Orders(device, description_id, price, created_at, client_id)
+VALUES ('iphone', 1, 50.00, '2018-06-23 07:30:20', 1) ,
+    ('laptop',3,15.50,'2020-03-22 05:20:30',3)
     ,
-    ('PC',2,'2019-07-15 07:30:20',2);
+    ('PC',2,5.30,'2019-07-15 07:30:20',2);
 
 INSERT INTO Workers(worker_name)
 VALUES ('Hank') ,
@@ -108,7 +109,19 @@ SELECT *
 FROM Descriptions;
 SELECT *
 FROM Orders;
+
 SELECT *
+FROM Orders,
+     Descriptions
+WHERE Orders.description_id = descriptions.id
+ORDER BY created_At;
+
+SELECT *
+FROM workers
+WHERE NOT EXISTS(SELECT worker_name
+                 FROM workers
+                 WHERE worker_name = 'Bob');
+
+SELECT MAX(price) AS Expensive_order
 FROM Orders
-         INNER JOIN Descriptions
-                    ON Orders.description_id = descriptions.id;
+WHERE created_at >= '2010-04-01';
