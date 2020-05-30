@@ -139,35 +139,51 @@ INSERT INTO Workers(worker_name)
              GROUP BY client_name
              HAVING COUNT(CLIENT_ID) = 0 OR COUNT(CLIENT_ID) >= 2;
              
-            GO 
-             --3.1--
+             
+             --3.2--
+             GO
+               CREATE FUNCTION order_date( @from DATETIME2, @to DATETIME2)
+             RETURNS TABLE
+             AS
+              RETURN 
+              SELECT *
+              FROM Orders
+              WHERE created_at BETWEEN @from AND @to;
+              
+              GO
+              SELECT *
+              FROM order_date('2015-02-10 07:30:20','2020-02-10 07:30:20');
+         
+          
+            --3.1--
+              GO 
              CREATE PROCEDURE new_order
-                    @Device            VARCHAR(50) = NULL,
-                    @Description_id    INT         = NULL,
-                    @Price             DECIMAL(5,2)= NULL,
-                    @Created_at        DATETIME2   = NULL,
-                    @Client_id         INT         = NULL
+                    @Device            VARCHAR(50),
+                    @Description_id    INT        ,
+                    @Price             DECIMAL(5,2),
+                    @Created_at        DATETIME2   ,
+                    @Client_id         INT        
              AS 
              BEGIN
                   SET NOCOUNT ON
                   
-                  INSERT INTO new_order
+                  INSERT INTO Orders
                               (
-                                 Device ,
-                                 Description_id ,
-                                 Price ,
-                                 Created_at  ,
-                                 Client_id     
+                                 device ,
+                                 description_id ,
+                                 price ,
+                                 created_at  ,
+                                 client_id     
                                )
                   VALUES
-                               (
+                        (
                             @Device ,
                             @Description_id,
                             @Price ,
                             @Created_at,
                             @Client_id 
                             
-                               )
+                           )
                 END
                 GO
                 
@@ -177,6 +193,11 @@ INSERT INTO Workers(worker_name)
                             @Price = 20.00,
                             @Created_at = '2015-02-10 07:30:20',
                             @Client_id = 4
+                            
+                            SELECT *
+                            FROM ORDERS;
              
-                GO
+             
+             
+           
       
