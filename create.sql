@@ -74,7 +74,8 @@ INSERT INTO Clients(client_name,telephone,email)
 VALUES ('John','123456789','john@gmail.com'),
         ('Tom','123','tom@yandex.com'),
         ('Jerry','987654321','jerry@rambler.com'),
-         ('Banny','12121212','banny@rambler.com');
+        ('Steve','11111111','steve@yahoo.com'),
+        ('Banny','12121212','banny@rambler.com');
        
        INSERT INTO Descriptions( problem_type,problem_description)
        VALUES('glass','front broken glass'),
@@ -85,17 +86,23 @@ INSERT INTO Orders(device,description_id,price,created_at,client_id)
 VALUES ('iphone',1,50.00,'2018-06-23 07:30:20',1),
        ('laptop',3,15.50,'2020-03-22 05:20:30',3),
        ('PC',2,5.30,'2019-07-15 07:30:20',2),
-       ('Keyboar',1,5.30,'2019-07-15 07:30:20',2);
+       ('Keyboar',1,5.30,'2019-07-15 07:30:20',2),
+       ('Tablet',1,17.00,'2019-07-15 07:30:20',4);
+       
 
 INSERT INTO Workers(worker_name)
  VALUES('Hank'),
 	   ('Bill'),
-	   ('James');
+	   ('James'),
+       ('Homer');
 
 			 
 
  INSERT INTO workers_orders(order_id,worker_id)
-			 VALUES (1,2);
+			 VALUES (1,2),
+                    (2,1),
+                    (3,2),
+                    (4,4);
 
 			 
 			  SELECT * 
@@ -106,21 +113,41 @@ INSERT INTO Workers(worker_name)
 			 FROM Descriptions;
              SELECT * 
 			 FROM Orders;
-             
+           
+            select 'test';   
+           
+           
              SELECT *
              FROM Orders,Descriptions,Clients
              WHERE Orders.description_id=descriptions.id AND Orders.client_id = Clients.id
              ORDER BY created_At;
              
+             SELECT *
+             FROM WORKERS_ORDERS
+              JOIN Orders
+                 on Orders.id=workers_orders.order_id
+              JOIN Workers
+                 on Workers.id = workers_orders.worker_id;
+             
+             select '2.1';
              --2.1--
              SELECT client_name,device,COUNT(CLIENT_ID) AS order_count
-             FROM Clients FULL OUTER JOIN Orders
-             ON Clients.id = orders.client_id
-             WHERE client_name LIKE 'J%' 
+             FROM Clients 
+             LEFT JOIN Orders ON Clients.id = orders.client_id
+             WHERE client_name LIKE 'B%' OR client_name LIKE 'J%' 
              GROUP BY client_name,device
              ORDER BY device desc, client_name;
              
              
+              --2.1A--
+             SELECT client_name,device
+             FROM Clients 
+             LEFT JOIN Orders ON Clients.id = orders.client_id
+             WHERE client_name LIKE 'B%' OR client_name LIKE 'J%' 
+             GROUP BY client_name,device
+             ORDER BY device desc, client_name;
+             
+             select '2.2';
              --2.2--
              SELECT *
              FROM workers
@@ -138,7 +165,37 @@ INSERT INTO Workers(worker_name)
              ON Clients.id = orders.client_id
              GROUP BY client_name
              HAVING COUNT(CLIENT_ID) = 0 OR COUNT(CLIENT_ID) >= 2;
+             --HAVING COUNT(CLIENT_ID) <> 1;
              
+              --2.4--
+             SELECT client_name,COUNT(CLIENT_ID) AS order_count
+             FROM Clients FULL OUTER JOIN Orders
+             ON Clients.id = orders.client_id
+             GROUP BY client_name
+             HAVING COUNT(CLIENT_ID) >= 0;
+             
+            --3.1--
+           
+                
+             GO 
+             CREATE PROCEDURE new_order_worker
+                    @Order_id          INT,
+                    @Worker_id         INT        
+             AS 
+             BEGIN
+                  SET NOCOUNT ON
+                  
+                  INSERT INTO Workers_Orders (order_id, worker_id)
+                  VALUES (@Order_id, @Worker_id)
+             END
+             GO
+                
+             select 'stored_provcedure';   
+             exec new_order_worker
+                    @Order_id = 1,
+                    @Worker_id = 1;
+             select * from workers_orders;       
+               
              
              --3.2--
              GO
@@ -146,8 +203,10 @@ INSERT INTO Workers(worker_name)
              RETURNS TABLE
              AS
               RETURN 
-              SELECT *
-              FROM Orders
+              SELECT o.id,device,created_at,price,problem_type,problem_description,client_name
+              FROM Orders AS o
+                   FULL OUTER JOIN Descriptions AS d ON o.description_id = d.id 
+                   FULL OUTER JOIN Clients AS c ON o.client_id = c.id
               WHERE created_at BETWEEN @from AND @to;
               
               GO
@@ -155,49 +214,8 @@ INSERT INTO Workers(worker_name)
               FROM order_date('2015-02-10 07:30:20','2020-02-10 07:30:20');
          
           
-            --3.1--
-              GO 
-             CREATE PROCEDURE new_order
-                    @Device            VARCHAR(50),
-                    @Description_id    INT        ,
-                    @Price             DECIMAL(5,2),
-                    @Created_at        DATETIME2   ,
-                    @Client_id         INT        
-             AS 
-             BEGIN
-                  SET NOCOUNT ON
-                  
-                  INSERT INTO Orders
-                              (
-                                 device ,
-                                 description_id ,
-                                 price ,
-                                 created_at  ,
-                                 client_id     
-                               )
-                  VALUES
-                        (
-                            @Device ,
-                            @Description_id,
-                            @Price ,
-                            @Created_at,
-                            @Client_id 
-                            
-                           )
-                END
-                GO
-                
-                exec new_order
-                            @Device = 'Tablet' ,
-                            @Description_id = 1,
-                            @Price = 20.00,
-                            @Created_at = '2015-02-10 07:30:20',
-                            @Client_id = 4
-                            
-                            SELECT *
-                            FROM ORDERS;
              
              
              
-           
+
       
